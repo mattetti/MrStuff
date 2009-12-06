@@ -1,6 +1,5 @@
 require "test/unit"
 framework "Cocoa"
-framework "CoreFoundation"
 
 $:.push File.join(File.dirname(__FILE__), "..", "lib")
 require "mr_task"

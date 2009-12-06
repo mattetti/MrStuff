@@ -1,3 +1,5 @@
+framework "CoreFoundation"
+
 module MrAsyncHelpers
   def async_result
     run_loop = NSRunLoop.currentRunLoop.getCFRunLoop
