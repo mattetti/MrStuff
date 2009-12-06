@@ -38,6 +38,7 @@ class MrTask
         on_output {|output| block.call output, done_notification }
       end
     end
+    self
   end
 
   def launch(*arguments)

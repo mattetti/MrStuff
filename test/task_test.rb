@@ -4,19 +4,10 @@ framework "CoreFoundation"
 
 $:.push File.join(File.dirname(__FILE__), "..", "lib")
 require "mr_task"
+require "#{File.dirname(__FILE__)}/async_helpers"
 
 class TestMrTask < Test::Unit::TestCase
-  def async_result
-    run_loop = NSRunLoop.currentRunLoop.getCFRunLoop
-    CFRunLoopRun(run_loop)
-    @result
-  end
-
-  def set_async_result(result)
-    run_loop = NSRunLoop.currentRunLoop.getCFRunLoop
-    CFRunLoopStop(run_loop)
-    @result = result
-  end
+  include MrAsyncHelpers
 
   def test_task_doesnt_segfault_with_invalid_executable
     assert_raises(MrTask::InvalidExecutable) { MrTask.new("/bin/mrinvalid") }
@@ -83,4 +74,5 @@ class TestMrTask < Test::Unit::TestCase
   ensure
     File.delete(file)
   end
+  
 end

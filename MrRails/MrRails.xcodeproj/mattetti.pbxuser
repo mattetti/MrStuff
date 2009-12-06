@@ -1,0 +1,152 @@
+// !$*UTF8*$!
+{
+	172754BD107597F200D0347B /* Unit Tests */ = {
+		activeExec = 0;
+	};
+	29B97313FDCFA39411CA2CEA /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeExecutable = 2B3B4DE010CBB2E50086BEB8 /* MrRails */;
+		activeTarget = 8D1107260486CEB800E47090 /* MrRails */;
+		addToTargets = (
+			8D1107260486CEB800E47090 /* MrRails */,
+		);
+		codeSenseManager = 2B3B4DF410CBB2EF0086BEB8 /* Code sense */;
+		executables = (
+			2B3B4DE010CBB2E50086BEB8 /* MrRails */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					341,
+					20,
+					48.16259765625,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 281785061;
+			PBXWorkspaceStateSaveDate = 281785061;
+		};
+		perUserProjectItems = {
+			2B3B4E0A10CBB8DD0086BEB8 /* PBXTextBookmark */ = 2B3B4E0A10CBB8DD0086BEB8 /* PBXTextBookmark */;
+			2B3B4E0B10CBB8DD0086BEB8 /* PBXTextBookmark */ = 2B3B4E0B10CBB8DD0086BEB8 /* PBXTextBookmark */;
+			2B3B4E0C10CBB8DD0086BEB8 /* PBXTextBookmark */ = 2B3B4E0C10CBB8DD0086BEB8 /* PBXTextBookmark */;
+		};
+		sourceControlManager = 2B3B4DF310CBB2EF0086BEB8 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	2B3B4DE010CBB2E50086BEB8 /* MrRails */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = MrRails;
+		savedGlobals = {
+		};
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	2B3B4DF310CBB2EF0086BEB8 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+	};
+	2B3B4DF410CBB2EF0086BEB8 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	2B3B4DF510CBB3080086BEB8 /* controller.rb */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {519, 480}}";
+			sepNavSelRange = "{268, 0}";
+			sepNavVisRange = "{170, 214}";
+		};
+	};
+	2B3B4E0A10CBB8DD0086BEB8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4DE339F60D74FCDD00ADB6EE /* rb_main.rb */;
+		name = "rb_main.rb: 12";
+		rLen = 0;
+		rLoc = 245;
+		rType = 0;
+		vrLen = 507;
+		vrLoc = 15;
+	};
+	2B3B4E0B10CBB8DD0086BEB8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2B3B4DF510CBB3080086BEB8 /* controller.rb */;
+		name = "controller.rb: 10";
+		rLen = 0;
+		rLoc = 187;
+		rType = 0;
+		vrLen = 247;
+		vrLoc = 26;
+	};
+	2B3B4E0C10CBB8DD0086BEB8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2B3B4DF510CBB3080086BEB8 /* controller.rb */;
+		name = "controller.rb: 17";
+		rLen = 0;
+		rLoc = 268;
+		rType = 0;
+		vrLen = 214;
+		vrLoc = 170;
+	};
+	4D1A51A110A4FF5D0046A98A /* Compile */ = {
+		activeExec = 0;
+	};
+	4D1A51A510A4FF640046A98A /* Embed */ = {
+		activeExec = 0;
+	};
+	4DE339F60D74FCDD00ADB6EE /* rb_main.rb */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {712, 384}}";
+			sepNavSelRange = "{245, 0}";
+			sepNavVisRange = "{15, 507}";
+		};
+	};
+	8D1107260486CEB800E47090 /* MrRails */ = {
+		activeExec = 0;
+		executables = (
+			2B3B4DE010CBB2E50086BEB8 /* MrRails */,
+		);
+	};
+}
