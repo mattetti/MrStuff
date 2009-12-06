@@ -57,7 +57,7 @@ class TestMrTask < Test::Unit::TestCase
     assert_match %r{Applications}, async_result
   end
 
-  def test_task_works_with_a_directory
+  def test_task_works_with_a_streaming_task
     run, result = 0, ""
     file = File.join(File.dirname(__FILE__), "log.log")
 
@@ -73,6 +73,16 @@ class TestMrTask < Test::Unit::TestCase
     assert_match /(into log\n){3}/, async_result
   ensure
     File.delete(file)
+  end
+  
+  def test_task_works_in_sync_mode
+    assert_match %r{Applications}, MrTask.launch("/bin/ls /")
+  end
+  
+  def test_task_cannot_be_launched_twice
+    ls = MrTask.new("/bin/ls")
+    ls.launch('/')
+    assert_raises(RuntimeError){ls.launch('/')}
   end
   
 end

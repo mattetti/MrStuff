@@ -1,3 +1,10 @@
+
+# Mr Task is a NSTask wrapper that has for goal to give MacRuby developer 
+# an API closer to what they would expect when using Ruby.
+#
+# For more information about NSTask, refer to:
+# http://developer.apple.com/mac/library/documentation/cocoa/Reference/Foundation/Classes/NSTask_Class/Reference/Reference.html
+# 
 class MrTask
   class InvalidExecutable < StandardError; end
 
@@ -7,12 +14,38 @@ class MrTask
     done: NSTaskDidTerminateNotification
   }
 
+  # Creates a new task instance with a launch path and a directory
+  # the directory is the location from which you want the task
+  # to be executed from.
+  # An optional block can be run asynchronously after the task is done.
+  # The new instance task still needs to be triggered by calling the +launch+
+  # method on it.
+  #
+  # Example: 
+  #   task = MrTask.new("/bin/ls", with_directory:"/") do |output|
+  #     puts output
+  #   end
+  #
+  #   task.launch
+  #
   def self.new(launch_path, with_directory:directory, &block)
     instance = new(launch_path, &block)
     instance.ns_object.currentDirectoryPath = directory
     instance
   end
+  
+  # Launches a synchronous/blocking task
+  # it's using Ruby's backticks kernel method
+  # http://ruby-doc.org/core/classes/Kernel.htm
+  #
+  # Example:
+  #   MrTask.launch("/bin/ls ~/")
+  #
+  def self.launch(cmd_with_args)
+    `#{cmd_with_args}`
+  end
 
+  
   def initialize(launch_path, &block)
     unless File.executable?(launch_path)
       raise InvalidExecutable, "#{launch_path} is not a valid executable"
@@ -41,12 +74,35 @@ class MrTask
     self
   end
 
+  # Triggers a MrTask instance.
+  # Optionals arguments can be passed to the task to execute
+  # Note: a task that was launched once cannot be launched another time.
+  # If you try to do so, an exception will be raised.
+  #
+  # Usage:
+  #   ls = MrTask.new("/bin/ls").launch('/')
+  #
   def launch(*arguments)
     @ns_object.arguments ||= arguments
     @ns_object.launch
     return stdin, stdout
   end
 
+
+  # Uses MrNotification in the background to monitor the status of your task.
+  # Once the task is done executing, the output is read and passed to the block.
+  #
+  # The block will keep on being run everytime more output is being sent out from
+  # the task. This makes this method really useful if you want to process a 
+  # running process for instance.
+  # 
+  # Usage:
+  #   task = MrTask.new("/usr/bin/tail").on_output do |output|
+  #     puts output
+  #   end
+  #  
+  #   task.launch("-f", "/var/log/apache2/access_log")
+  #
   def on_output(&block)
     require "mr_notification"
     
@@ -70,6 +126,8 @@ class MrTask
     self
   end
 
+  # Setups or returns the in and out of the task's pipe
+  # 
   def pipe
     return stdin, stdout if @ns_object.standardInput.respond_to?(:fileHandleForWriting)
 
@@ -96,6 +154,7 @@ class MrTask
     stderr
   end
 
+  # Waits for the task to be done running in the background
   def wait
     @ns_object.waitUntilExit
   end
@@ -104,10 +163,12 @@ class MrTask
     @ns_object.arguments
   end
 
+  # Returns the task's current directory path
   def pwd
     @ns_object.currentDirectoryPath
   end
 
+  # Returns the executable that is going to be called by the task
   def executable
     @ns_object.launchPath
   end
