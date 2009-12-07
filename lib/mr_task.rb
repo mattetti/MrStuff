@@ -48,7 +48,7 @@ class MrTask
   # is equivalent to:
   #   MrTask.new("/bin/ls").launch("~/")
   def self.launch(cmd, with_arguments:arguments, &block)
-    new(cmd, &block).launch(arguments)
+    new(cmd, &block).launch(*arguments)
   end
 
   # Instantiates and launching a MrTask with no arguments
@@ -150,6 +150,7 @@ class MrTask
     return stdin, stdout, stderr
   end
 
+  # A MrFileHandle wrapping the standard input stream
   def stdin
     @stdin ||= MrFileHandle.new(@ns_object.standardInput)
   end
