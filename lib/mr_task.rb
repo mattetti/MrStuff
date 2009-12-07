@@ -87,6 +87,8 @@ class MrTask
   # Usage:
   #   MrTask.new("/bin/ls").launch('/')
   def launch(*arguments)
+    arguments = arguments[0] if arguments.size == 1 && arguments[0].is_a?(Array)
+
     @ns_object.arguments ||= arguments
     @ns_object.launch
 
