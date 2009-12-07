@@ -78,7 +78,7 @@ class TestMrTask < Test::Unit::TestCase
   end
 
   def test_task_launch_works
-    MrTask.launch("/bin/ls", with_arguments:"/") do |output|
+    MrTask.launch("/bin/ls", "/") do |output|
       set_async_result(output)
     end
 

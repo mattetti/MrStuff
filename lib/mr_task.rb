@@ -44,21 +44,11 @@ class MrTask
   # takes an optional block that is passed to #new.
   #
   # Example:
-  #   MrTask.launch("/bin/ls", with_arguments:"~/")
+  #   MrTask.launch("/bin/ls", "~/")
   # is equivalent to:
   #   MrTask.new("/bin/ls").launch("~/")
-  def self.launch(cmd, with_arguments:arguments, &block)
+  def self.launch(cmd, *arguments, &block)
     new(cmd, &block).launch(*arguments)
-  end
-
-  # Instantiates and launching a MrTask with no arguments
-  #
-  # Example:
-  #   MrTask.launch("/bin/ls")
-  # is equivalent to:
-  #   MrTask.new("/bin/ls").launch
-  def self.launch(cmd, &block)
-    launch(cmd, with_arguments:[], &block)
   end
 
   def initialize(launch_path, &block)
