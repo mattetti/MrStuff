@@ -3,3 +3,5 @@ MrRails/build
 MrRails/MrRails.xcodeproj/*.mode1v3
 MrRails/MrRails.xcodeproj/*.pbxuser
 
+log.log
+test/log.log

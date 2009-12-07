@@ -117,7 +117,7 @@ class TestMrTask < Test::Unit::TestCase
   def test_task_knows_its_not_running_once_its_dead
     ls = MrTask.new("/usr/bin/ruby")
     ls.launch("-e", "'sleep'")
-    ls.kill
+    ls.kill(9)
     assert !ls.running?
   end
 

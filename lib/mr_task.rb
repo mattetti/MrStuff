@@ -1,3 +1,4 @@
+require "mr_file_handle"
 
 # Mr Task is a NSTask wrapper that has gives MacRuby developers
 # an API closer to what they would expect when using Ruby.
@@ -73,7 +74,7 @@ class MrTask
     # triggered with the output when the process terminates. This
     # is useful for "shelling out".
     if block_given?
-      require "mr_notification"
+      require "mr_notification_center"
 
       pipein, pipeout, pipeerr = pipe
 
@@ -105,11 +106,11 @@ class MrTask
   end
 
   def standard_output
-    @standard_output ||= string_for_data(stdout.readDataToEndOfFile)
+    @standard_output ||= stdout.read_to_end
   end
 
   def error_output
-    @error_output ||= string_for_data(stderr.readDataToEndOfFile)
+    @error_output ||= stderr.read_to_end
   end
 
   # Uses MrNotificationCenter in the background to monitor the status of your task.
@@ -127,12 +128,14 @@ class MrTask
   #   task.launch("-f", "/var/log/apache2/access_log")
   def on_output(&block)
     pipein, pipeout, pipeerr = pipe
-    on_data(pipeout, &block)
+    pipeout.read(&block)
+    self
   end
 
   def on_error(&block)
     pipein, pipeout, pipeerr = pipe
-    on_data(pipeerr, &block)
+    pipeerr.read(&block)
+    self
   end
 
   # Pipes the output through new NSPipes. This means that you will not see
@@ -140,6 +143,7 @@ class MrTask
   #
   # Returns [stdin, stdout, stderr] as NSFileHandles
   def pipe
+    # Set stdin, stdout, and stderr to pipes
     return stdin, stdout, stderr if @ns_object.standardInput.respond_to?(:fileHandleForWriting)
 
     @ns_object.standardInput  = NSPipe.alloc.init
@@ -149,21 +153,27 @@ class MrTask
   end
 
   def stdin
-    stdin = @ns_object.standardInput
-    stdin = stdin.fileHandleForWriting if stdin.respond_to?(:fileHandleForWriting)
-    stdin
+    @stdin ||= begin
+      stdin = @ns_object.standardInput
+      stdin = stdin.fileHandleForWriting if stdin.respond_to?(:fileHandleForWriting)
+      MrFileHandle.new(stdin)
+    end
   end
 
   def stdout
-    stdout = @ns_object.standardOutput
-    stdout = stdout.fileHandleForReading if stdout.respond_to?(:fileHandleForReading)
-    stdout
+    @stdout ||= begin
+      stdout = @ns_object.standardOutput
+      stdout = stdout.fileHandleForReading if stdout.respond_to?(:fileHandleForReading)
+      MrFileHandle.new(stdout)
+    end
   end
 
   def stderr
-    stderr = @ns_object.standardError
-    stderr = stderr.fileHandleForReading if stderr.respond_to?(:fileHandleForReading)
-    stderr
+    @stderr ||= begin
+      stderr = @ns_object.standardError
+      stderr = stderr.fileHandleForReading if stderr.respond_to?(:fileHandleForReading)
+      MrFileHandle.new(stderr)
+    end
   end
 
   # Waits for the task to be done running in the background
@@ -253,31 +263,5 @@ class MrTask
   # if the reason is unavailable or the task is still running.
   def reason
     @ns_object.terminationReason unless running?
-  end
-
-private
-  def on_data(handle, &block)
-    require "mr_notification"
-
-    event_name = NSFileHandleReadCompletionNotification
-
-    MrNotificationCenter.subscribe(handle, event_name) do |notification|
-      data = notification.userInfo[NSFileHandleNotificationDataItem]
-
-      if data.length > 0
-        output = string_for_data(data)
-        block.call output, notification
-      end
-
-      handle.readInBackgroundAndNotify
-    end
-
-    handle.readInBackgroundAndNotify
-    self
-  end
-
-  def string_for_data(data)
-    NSString.alloc.initWithData(data, encoding:NSUTF8StringEncoding) ||
-    NSString.alloc.initWithData(data, encoding:NSASCIIStringEncoding)
   end
 end

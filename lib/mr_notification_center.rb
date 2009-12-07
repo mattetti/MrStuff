@@ -1,5 +1,24 @@
 framework "Cocoa"
 
+class MrNotification
+  attr_reader :object
+  def initialize(notification, mr_object)
+    @notification, @object = notification, mr_object
+  end
+
+  def ns_object
+    @object.ns_object if @object.respond_to?(:n_object)
+  end
+
+  def name
+    @notification.name
+  end
+  
+  def user_info
+    @notification.userInfo
+  end
+end
+
 class MrNotificationCenter
   # This is an internal listener that is used by MrNotificationCenter to convert
   # a block into a valid Cocoa listener.
@@ -12,17 +31,7 @@ class MrNotificationCenter
     end
 
     def ready(notification)
-      object = @object
-      
-      notification.instance_eval do
-        @ns_obect  = notification.object
-        @mr_object = object
-
-        def self.ns_object() @ns_object end
-        def self.object()    @mr_object end
-      end
-
-      @block.call(notification)
+      @block.call MrNotification.new(notification, @object)
     end
   end
 
@@ -65,7 +74,11 @@ class MrNotificationCenter
   def subscribe(object, event, &block)
     @listeners << Listener.new(object, block)
 
+    # If the object is a MrWrapped object, this allows the user to pass
+    # a shorter :event_name instead of the normal, long NSEventName
     event  = object.class::NOTIFICATIONS[event] if object.class.const_defined?(:NOTIFICATIONS)
+
+    # If the object is a MrWrapped object, get the ns_object from it
     object = object.ns_object if object.respond_to?(:ns_object)
 
     @notification_center.addObserver(@listeners.last,

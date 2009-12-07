@@ -1,7 +1,7 @@
 framework 'Cocoa'
 
 $:.push "#{Dir.pwd}/lib"
-require "mr_notification"
+require "mr_notification_center"
 require "mr_task"
 
 task = MrTask.new("/bin/cat", with_directory:"/bin/") do |output, notification|
