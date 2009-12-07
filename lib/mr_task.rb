@@ -97,12 +97,12 @@ class MrTask
     return stdin, stdout
   end
 
-  def standard_output
-    @standard_output ||= stdout.read_to_end
+  def standard_output(&block)
+    @standard_output ||= stdout.read_to_end(&block)
   end
 
-  def error_output
-    @error_output ||= stderr.read_to_end
+  def error_output(&block)
+    @error_output ||= stderr.read_to_end(&block)
   end
 
   # Uses MrNotificationCenter in the background to monitor the status of your task.
