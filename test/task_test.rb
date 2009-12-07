@@ -91,4 +91,42 @@ class TestMrTask < Test::Unit::TestCase
     assert_raises(RuntimeError){ls.launch('/')}
   end
 
+  def test_task_knows_its_pwd
+    ls = MrTask.new("/bin/ls")
+    assert_equal File.expand_path(Dir.pwd), ls.pwd
+  end
+
+  def test_task_knows_its_custom_pwd
+    ls = MrTask.new("/bin/ls", with_directory:"/")
+    assert_equal "/", ls.pwd
+  end
+
+  def test_task_knows_its_not_running_before_it_started
+    ls = MrTask.new("/bin/ls")
+    assert !ls.running?
+  end
+
+  def test_task_knows_when_its_running
+    ls = MrTask.new("/usr/bin/ruby")
+    ls.launch("-e", "'sleep'")
+    assert ls.running?
+  ensure
+    ls.kill
+  end
+
+  def test_task_knows_its_not_running_once_its_dead
+    ls = MrTask.new("/usr/bin/ruby")
+    ls.launch("-e", "'sleep'")
+    ls.kill
+    assert !ls.running?
+  end
+
+  def test_task_sends_stderr
+    rb = MrTask.new("/usr/bin/ruby") do |output, error|
+      set_async_result(error)
+    end
+    rb.launch("-e", "$stderr.puts 'omg'; exit 1")
+    assert_equal "omg\n", async_result
+  end
+
 end

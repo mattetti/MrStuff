@@ -25,7 +25,7 @@ class MrTask
   # The new instance task still needs to be triggered by calling the +launch+
   # method on it.
   #
-  # Example: 
+  # Example:
   #   task = MrTask.new("/bin/ls", with_directory:"/") do |output|
   #     puts output
   #   end
@@ -37,7 +37,7 @@ class MrTask
     instance.ns_object.currentDirectoryPath = directory
     instance
   end
-  
+
   # Instantiates and launches a MrTask asynchronously. This method
   # takes an optional block that is passed to #new.
   #
@@ -75,14 +75,13 @@ class MrTask
     if block_given?
       require "mr_notification"
 
-      pipein, pipeout = pipe
+      pipein, pipeout, pipeerr = pipe
 
       # Retaining object because NotificationCenter uses WeakRef
       done_notification = nil
 
       MrNotificationCenter.subscribe(self, :done) do |notification|
-        done_notification = notification
-        on_output {|output| block.call output, done_notification }
+        block.call standard_output, error_output, notification
       end
     end
     self
@@ -97,13 +96,21 @@ class MrTask
   # If you try to do so, an exception will be raised.
   #
   # Usage:
-  #   ls = MrTask.new("/bin/ls").launch('/')
+  #   MrTask.new("/bin/ls").launch('/')
   def launch(*arguments)
     @ns_object.arguments ||= arguments
     @ns_object.launch
+
     return stdin, stdout
   end
 
+  def standard_output
+    @standard_output ||= string_for_data(stdout.readDataToEndOfFile)
+  end
+
+  def error_output
+    @error_output ||= string_for_data(stderr.readDataToEndOfFile)
+  end
 
   # Uses MrNotificationCenter in the background to monitor the status of your task.
   # As output streams back, the block that you passed is called with the output
@@ -111,7 +118,7 @@ class MrTask
   #
   # The block is triggered once for each chunk of output that comes back from
   # the task. This is especially useful for monitoring a running task.
-  # 
+  #
   # Usage:
   #   task = MrTask.new("/usr/bin/tail").on_output do |output|
   #     puts output
@@ -119,38 +126,26 @@ class MrTask
   #
   #   task.launch("-f", "/var/log/apache2/access_log")
   def on_output(&block)
-    require "mr_notification"
-    
-    pipein, pipeout = pipe
+    pipein, pipeout, pipeerr = pipe
+    on_data(pipeout, &block)
+  end
 
-    event_name = NSFileHandleReadCompletionNotification
-    MrNotificationCenter.subscribe(pipeout, event_name) do |notification|
-      data = notification.userInfo[NSFileHandleNotificationDataItem]
-
-      if data.length > 0
-        output = NSString.alloc.initWithData(data, encoding:NSUTF8StringEncoding) ||
-                 NSString.alloc.initWithData(data, encoding:NSASCIIStringEncoding)
-
-        block.call output, notification
-      end
-
-      pipeout.readInBackgroundAndNotify
-    end
-
-    pipeout.readInBackgroundAndNotify
-    self
+  def on_error(&block)
+    pipein, pipeout, pipeerr = pipe
+    on_data(pipeerr, &block)
   end
 
   # Pipes the output through new NSPipes. This means that you will not see
   # the output of the child task in the stdout of your main process.
   #
-  # Returns [stdin, stdout] as NSFileHandles
+  # Returns [stdin, stdout, stderr] as NSFileHandles
   def pipe
-    return stdin, stdout if @ns_object.standardInput.respond_to?(:fileHandleForWriting)
+    return stdin, stdout, stderr if @ns_object.standardInput.respond_to?(:fileHandleForWriting)
 
     @ns_object.standardInput  = NSPipe.alloc.init
     @ns_object.standardOutput = NSPipe.alloc.init
-    return stdin, stdout
+    @ns_object.standardError  = NSPipe.alloc.init
+    return stdin, stdout, stderr
   end
 
   def stdin
@@ -193,12 +188,16 @@ class MrTask
 
   # Send a SIGINT to the task
   def interrupt
-    kill(:INT)
+    kill(:INT) if running?
   end
 
   # Send a signal to the task (defaults to SIGTERM)
   def kill(signal = :TERM)
-    Process.kill(signal, @ns_object.processIdentifier)
+    Process.kill(signal, @ns_object.processIdentifier) if running?
+  # Since the process is launched async, the pid may not yet be
+  # available. If the process can't be found yet, try again.
+  rescue Errno::ESRCH
+    retry if running?
   end
 
   # Returns a boolean reflecting whether the task is still running
@@ -208,7 +207,7 @@ class MrTask
 
   # Returns the pid of the task
   def pid
-    @ns_object.process_identifier
+    @ns_object.processIdentifier
   end
 
   # Returns true if the task is suspended. This does not reflect calls to suspend
@@ -254,5 +253,31 @@ class MrTask
   # if the reason is unavailable or the task is still running.
   def reason
     @ns_object.terminationReason unless running?
+  end
+
+private
+  def on_data(handle, &block)
+    require "mr_notification"
+
+    event_name = NSFileHandleReadCompletionNotification
+
+    MrNotificationCenter.subscribe(handle, event_name) do |notification|
+      data = notification.userInfo[NSFileHandleNotificationDataItem]
+
+      if data.length > 0
+        output = string_for_data(data)
+        block.call output, notification
+      end
+
+      handle.readInBackgroundAndNotify
+    end
+
+    handle.readInBackgroundAndNotify
+    self
+  end
+
+  def string_for_data(data)
+    NSString.alloc.initWithData(data, encoding:NSUTF8StringEncoding) ||
+    NSString.alloc.initWithData(data, encoding:NSASCIIStringEncoding)
   end
 end
