@@ -1,7 +1,7 @@
 framework "Cocoa"
 
-class MrNotification
-  # This is an internal listener that is used by MrNotification to convert
+class MrNotificationCenter
+  # This is an internal listener that is used by MrNotificationCenter to convert
   # a block into a valid Cocoa listener.
   #
   # In addition to wrapping the block, it also makes n.object equal to the
@@ -35,7 +35,7 @@ class MrNotification
     @center
   end
 
-  # Creates a new MrNotification that wraps an NSNotificationCenter. By default
+  # Creates a new MrNotificationCenter that wraps an NSNotificationCenter. By default
   # it uses the defaultCenter.
   def initialize(notification_center = NSNotificationCenter.defaultCenter)
     @notification_center = notification_center
@@ -52,14 +52,14 @@ class MrNotification
   #   }
   #
   # This means that you can do: 
-  #   MrNotification.subscribe(@mr_task, :done) do |notification|
+  #   MrNotificationCenter.subscribe(@mr_task, :done) do |notification|
   #     # stuff that should happen when NSTaskDidTerminateNotification
   #     # is triggered on the NSTask that the MrTask is wrapping
   #   end
   #
   # Example:
   #
-  #   center = MrNotification.new(NSNotificationCenter.alloc.init)
+  #   center = MrNotificationCenter.new(NSNotificationCenter.alloc.init)
   #   center.subscribe(@ns_object, @ns_notification_name) do |notification|
   #   end
   def subscribe(object, event, &block)

@@ -10,7 +10,7 @@ class MrTask
   attr_reader :ns_object
 
   # The NSTaskDidTerminateNotification is mapped to :done when
-  # using the MrNotification for a MrTask
+  # using the MrNotificationCenter for a MrTask
   NOTIFICATIONS = {
     done: NSTaskDidTerminateNotification
   }
@@ -80,7 +80,7 @@ class MrTask
       # Retaining object because NotificationCenter uses WeakRef
       done_notification = nil
 
-      MrNotification.subscribe(self, :done) do |notification|
+      MrNotificationCenter.subscribe(self, :done) do |notification|
         done_notification = notification
         on_output {|output| block.call output, done_notification }
       end
@@ -105,7 +105,7 @@ class MrTask
   end
 
 
-  # Uses MrNotification in the background to monitor the status of your task.
+  # Uses MrNotificationCenter in the background to monitor the status of your task.
   # As output streams back, the block that you passed is called with the output
   # and the original notification (NSFileHandleReadCompletionNotification).
   #
@@ -124,7 +124,7 @@ class MrTask
     pipein, pipeout = pipe
 
     event_name = NSFileHandleReadCompletionNotification
-    MrNotification.subscribe(pipeout, event_name) do |notification|
+    MrNotificationCenter.subscribe(pipeout, event_name) do |notification|
       data = notification.userInfo[NSFileHandleNotificationDataItem]
 
       if data.length > 0
