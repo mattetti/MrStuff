@@ -118,8 +118,10 @@ class TestMrTask < Test::Unit::TestCase
   def test_task_knows_its_not_running_once_its_dead
     ls = MrTask.new("/usr/bin/ruby")
     ls.launch("-e", "'sleep'")
-    ls.kill(9)
-    assert !ls.running?
+    ls.kill(9) do |notification|
+      set_async_result ls.running?
+    end
+    assert !async_result
   end
 
   def test_task_sends_stderr

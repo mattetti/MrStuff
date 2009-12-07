@@ -186,17 +186,18 @@ class MrTask
   end
 
   # Send a SIGINT to the task
-  def interrupt
-    kill(:INT) if running?
+  def interrupt(&block)
+    kill(:INT, &block) if running?
   end
 
   # Send a signal to the task (defaults to SIGTERM)
-  def kill(signal = :TERM)
+  def kill(signal = :TERM, &block)
     Process.kill(signal, @ns_object.processIdentifier) if running?
-  # Since the process is launched async, the pid may not yet be
-  # available. If the process can't be found yet, try again.
-  rescue Errno::ESRCH
-    retry if running?
+
+    if block_given?
+      require "mr_notification_center"
+      MrNotificationCenter.subscribe(self, :done, &block)
+    end
   end
 
   # Returns a boolean reflecting whether the task is still running
