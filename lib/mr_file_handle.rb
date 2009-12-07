@@ -21,7 +21,11 @@ class MrFileHandle
 
   # Kick off a background read and call the block when the read is finished
   def read(&block)
-    read_in_background(:readInBackgroundAndNotify, :read_finished, &block)
+    if block_given?
+      read_in_background(:readInBackgroundAndNotify, :read_finished, &block)
+    else
+      MrUtils.string_from_data(@ns_object.read)
+    end
   end
 
   # If a block is given:
@@ -32,15 +36,8 @@ class MrFileHandle
     if block_given?
       read_in_background(:readToEndOfFileInBackgroundAndNotify, :end_of_file, &block)
     else
-      data = MrUtils.string_from_data(@ns_object.readDataToEndOfFile)
+      MrUtils.string_from_data(@ns_object.readDataToEndOfFile)
     end
-  end
-
-  # Kick off a background wait for new data on the file handle. When
-  # data is available, call the block
-  def wait_for_data(&block)
-    MrNotificationCenter.subscribe(self, :data_available, &block)
-    @ns_object.waitForDataInBackgroundAndNotify
   end
 
   # The file descriptor number
