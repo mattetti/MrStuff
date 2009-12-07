@@ -37,7 +37,7 @@ private
     require "mr_notification_center"
 
     MrNotificationCenter.subscribe(self, notification) do |notification|
-      data = notification.user_info[NSFileHandleNotificationDataItem]
+      data = notification.userInfo[NSFileHandleNotificationDataItem]
 
       if data.length > 0
         output = NSString.alloc.initWithData(data, encoding:NSUTF8StringEncoding)
