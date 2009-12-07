@@ -137,14 +137,18 @@ class MrTask
   # Pipes the output through new NSPipes. This means that you will not see
   # the output of the child task in the stdout of your main process.
   #
-  # Returns [stdin, stdout, stderr] as NSFileHandles
+  # The first time this is called, it sets up the pipes. Every subsequent
+  # time, it simply returns the streams.
+  #
+  # Returns [stdin, stdout, stderr] as MrFileHandles
   def pipe
-    # Set stdin, stdout, and stderr to pipes
-    return stdin, stdout, stderr if @ns_object.standardInput.respond_to?(:fileHandleForWriting)
+    unless @ns_object.standardInput.respond_to?(:fileHandleForWriting)
+      # Set stdin, stdout, and stderr to pipes
+      @ns_object.standardInput  = NSPipe.alloc.init
+      @ns_object.standardOutput = NSPipe.alloc.init
+      @ns_object.standardError  = NSPipe.alloc.init
+    end
 
-    @ns_object.standardInput  = NSPipe.alloc.init
-    @ns_object.standardOutput = NSPipe.alloc.init
-    @ns_object.standardError  = NSPipe.alloc.init
     return stdin, stdout, stderr
   end
 
@@ -153,15 +157,17 @@ class MrTask
     @stdin ||= MrFileHandle.new(@ns_object.standardInput)
   end
 
+  # A MrFileHandle wrapping the standard output stream
   def stdout
     @stdout ||= MrFileHandle.new(@ns_object.standardOutput)
   end
 
+  # A MrFileHandle wrapping the standard error stream
   def stderr
     @stderr ||= MrFileHandle.new(@ns_object.standardError)
   end
 
-  # Waits for the task to be done running in the background
+  # Synchronously waits for the task to be done
   def wait
     @ns_object.waitUntilExit
   end
@@ -171,6 +177,7 @@ class MrTask
     @ns_object.arguments
   end
 
+  # Sets the arguments for the task
   def arguments=(arguments)
     @ns_object.arguments = arguments
   end
@@ -180,6 +187,7 @@ class MrTask
     @ns_object.currentDirectoryPath
   end
 
+  # Sets the path that the task should be executed from
   def pwd=(directory)
     @ns_object.currentDirectoryPath = directory
   end
@@ -194,12 +202,15 @@ class MrTask
     kill(:INT, &block) if running?
   end
 
-  # Send a signal to the task (defaults to SIGTERM)
+  # Send a signal to the task (defaults to SIGTERM).
+  #
+  # If a block is provided, it registers an on_done event.
   def kill(signal = :TERM, &block)
     Process.kill(signal, @ns_object.processIdentifier) if running?
     on_done(&block) if block_given?
   end
 
+  # Subscribe to an event that will be triggered when the process terminates.
   def on_done(&block)
     require "mr_notification_center"
     MrNotificationCenter.subscribe(self, :done, &block)
