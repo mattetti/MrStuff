@@ -19,16 +19,43 @@ class MrFileHandle
     :end_of_file    => NSFileHandleReadToEndOfFileCompletionNotification,
   }
 
+  # Kick off a background read and call the block when the read is finished
   def read(&block)
     read_in_background(:readInBackgroundAndNotify, :read_finished, &block)
   end
 
+  # If a block is given:
+  #   Kick off a background read and call the block with the String when EOF is reached
+  # Otherwise:
+  #   Synchonously read the data until EOF and return a String
   def read_to_end(&block)
     if block_given?
       read_in_background(:readToEndOfFileInBackgroundAndNotify, :end_of_file, &block)
     else
       data = MrUtils.string_from_data(@ns_object.readDataToEndOfFile)
     end
+  end
+
+  # Kick off a background wait for new data on the file handle. When
+  # data is available, call the block
+  def wait_for_data(&block)
+    MrNotificationCenter.subscribe(self, :data_available, &block)
+    @ns_object.waitForDataInBackgroundAndNotify
+  end
+
+  # The file descriptor number
+  def fileno
+    @ns_object.fileDescriptor
+  end
+
+  # Close the file
+  def close
+    @ns_object.closeFile
+  end
+
+  # Truncate the file at the offset
+  def truncate(offset)
+    @ns_object.truncateFileAtOffset(offset)
   end
 
 private
