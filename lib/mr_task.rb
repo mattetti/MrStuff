@@ -79,10 +79,7 @@ class MrTask
 
       pipein, pipeout, pipeerr = pipe
 
-      # Retaining object because NotificationCenter uses WeakRef
-      done_notification = nil
-
-      MrNotificationCenter.subscribe(self, :done) do |notification|
+      on_done do |notification|
         block.call standard_output, error_output, notification
       end
     end
@@ -193,11 +190,12 @@ class MrTask
   # Send a signal to the task (defaults to SIGTERM)
   def kill(signal = :TERM, &block)
     Process.kill(signal, @ns_object.processIdentifier) if running?
+    on_done(&block) if block_given?
+  end
 
-    if block_given?
-      require "mr_notification_center"
-      MrNotificationCenter.subscribe(self, :done, &block)
-    end
+  def on_done(&block)
+    require "mr_notification_center"
+    MrNotificationCenter.subscribe(self, :done, &block)
   end
 
   # Returns a boolean reflecting whether the task is still running
