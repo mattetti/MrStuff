@@ -27,8 +27,7 @@ class MrFileHandle
     if block_given?
       read_in_background(:readToEndOfFileInBackgroundAndNotify, :end_of_file, &block)
     else
-      data = @ns_object.readDataToEndOfFile
-      NSString.alloc.initWithData(data, encoding:NSUTF8StringEncoding)
+      data = MrUtils.string_from_data(@ns_object.readDataToEndOfFile)
     end
   end
 
@@ -40,8 +39,7 @@ private
       data = notification.userInfo[NSFileHandleNotificationDataItem]
 
       if data.length > 0
-        output = NSString.alloc.initWithData(data, encoding:NSUTF8StringEncoding)
-        block.call output, notification
+        block.call MrUtils.string_from_data(data), notification
       end
 
       @ns_object.send(selector)

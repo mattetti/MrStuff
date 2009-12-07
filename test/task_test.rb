@@ -2,8 +2,9 @@ require "test/unit"
 framework "Cocoa"
 
 $:.push File.join(File.dirname(__FILE__), "..", "lib")
+$:.push File.dirname(__FILE__)
 require "mr_task"
-require "#{File.dirname(__FILE__)}/async_helpers"
+require "async_helpers"
 
 class TestMrTask < Test::Unit::TestCase
   include MrAsyncHelpers

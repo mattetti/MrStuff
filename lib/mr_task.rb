@@ -1,4 +1,5 @@
 require "mr_file_handle"
+require "mr_utils"
 
 # Mr Task is a NSTask wrapper that has gives MacRuby developers
 # an API closer to what they would expect when using Ruby.
