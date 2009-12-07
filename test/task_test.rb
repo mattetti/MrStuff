@@ -17,6 +17,7 @@ class TestMrTask < Test::Unit::TestCase
 
   def test_simple_task_doesnt_explode
     task = MrTask.new("/bin/ls")
+    task.pipe
     assert_nothing_raised { task.launch }
   end
 
@@ -58,7 +59,8 @@ class TestMrTask < Test::Unit::TestCase
 
   def test_task_works_with_a_streaming_task
     run, result = 0, ""
-    file = File.join(File.dirname(__FILE__), "log.log")
+    file = File.expand_path(File.join(File.dirname(__FILE__), "log.log"))
+    `touch #{file}`
 
     task = MrTask.new("/usr/bin/tail").on_output do |output|
       File.open(file, "a") {|f| f.puts "into log" }
@@ -73,15 +75,20 @@ class TestMrTask < Test::Unit::TestCase
   ensure
     File.delete(file)
   end
-  
-  def test_task_works_in_sync_mode
-    assert_match %r{Applications}, MrTask.launch("/bin/ls /")
+
+  def test_task_launch_works
+    MrTask.launch("/bin/ls", with_arguments:"/") do |output|
+      set_async_result(output)
+    end
+
+    assert_match %r{Applications}, async_result
   end
-  
+
   def test_task_cannot_be_launched_twice
     ls = MrTask.new("/bin/ls")
+    ls.pipe
     ls.launch('/')
     assert_raises(RuntimeError){ls.launch('/')}
   end
-  
+
 end
