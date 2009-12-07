@@ -86,10 +86,12 @@ class MrTask
   #
   # Usage:
   #   MrTask.new("/bin/ls").launch('/')
-  def launch(*arguments)
-    arguments = arguments[0] if arguments.size == 1 && arguments[0].is_a?(Array)
+  def launch(*args)
+    options = args.last.is_a?(Hash) ? args.pop : {}
+    args = args.first if args.first.is_a?(Array)
 
-    @ns_object.arguments ||= arguments
+    self.pwd = options[:from_directory] if options[:from_directory]
+    self.arguments ||= args
     @ns_object.launch
 
     return stdin, stdout
@@ -169,9 +171,17 @@ class MrTask
     @ns_object.arguments
   end
 
+  def arguments=(arguments)
+    @ns_object.arguments = arguments
+  end
+
   # Returns the task's current directory path
   def pwd
     @ns_object.currentDirectoryPath
+  end
+
+  def pwd=(directory)
+    @ns_object.currentDirectoryPath = directory
   end
 
   # Returns the executable for the task
