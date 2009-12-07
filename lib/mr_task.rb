@@ -154,27 +154,15 @@ class MrTask
   end
 
   def stdin
-    @stdin ||= begin
-      stdin = @ns_object.standardInput
-      stdin = stdin.fileHandleForWriting if stdin.respond_to?(:fileHandleForWriting)
-      MrFileHandle.new(stdin)
-    end
+    @stdin ||= MrFileHandle.new(@ns_object.standardInput)
   end
 
   def stdout
-    @stdout ||= begin
-      stdout = @ns_object.standardOutput
-      stdout = stdout.fileHandleForReading if stdout.respond_to?(:fileHandleForReading)
-      MrFileHandle.new(stdout)
-    end
+    @stdout ||= MrFileHandle.new(@ns_object.standardOutput)
   end
 
   def stderr
-    @stderr ||= begin
-      stderr = @ns_object.standardError
-      stderr = stderr.fileHandleForReading if stderr.respond_to?(:fileHandleForReading)
-      MrFileHandle.new(stderr)
-    end
+    @stderr ||= MrFileHandle.new(@ns_object.standardError)
   end
 
   # Waits for the task to be done running in the background
