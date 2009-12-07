@@ -12,7 +12,7 @@ class TestMrTask < Test::Unit::TestCase
   def test_task_doesnt_segfault_with_invalid_executable
     assert_raises(MrTask::InvalidExecutable) { MrTask.new("/bin/mrinvalid") }
     assert_raises(MrTask::InvalidExecutable) do
-      MrTask.new("/bin/mrinvalid", with_directory:"/")
+      MrTask.new("/bin/mrinvalid", from_directory:"/")
     end
   end
 
@@ -49,8 +49,8 @@ class TestMrTask < Test::Unit::TestCase
     assert_match %r{lib}, async_result
   end
 
-  def test_task_with_directory_waits_for_exit_and_calls_block_with_output
-    task = MrTask.new("/bin/ls", with_directory:"/") do |output|
+  def test_task_from_directory_waits_for_exit_and_calls_block_with_output
+    task = MrTask.new("/bin/ls", from_directory:"/") do |output|
       set_async_result(output)
     end
 
@@ -98,7 +98,7 @@ class TestMrTask < Test::Unit::TestCase
   end
 
   def test_task_knows_its_custom_pwd
-    ls = MrTask.new("/bin/ls", with_directory:"/")
+    ls = MrTask.new("/bin/ls", from_directory:"/")
     assert_equal "/", ls.pwd
   end
 

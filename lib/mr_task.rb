@@ -28,13 +28,13 @@ class MrTask
   # method on it.
   #
   # Example:
-  #   task = MrTask.new("/bin/ls", with_directory:"/") do |output|
+  #   task = MrTask.new("/bin/ls", from_directory:"/") do |output|
   #     puts output
   #   end
   #
   #   task.launch
   #
-  def self.new(launch_path, with_directory:directory, &block)
+  def self.new(launch_path, from_directory:directory, &block)
     instance = new(launch_path, &block)
     instance.ns_object.currentDirectoryPath = directory
     instance
@@ -116,16 +116,20 @@ class MrTask
   #   end
   #
   #   task.launch("-f", "/var/log/apache2/access_log")
-  def on_output(&block)
+  def on_stdout(&block)
     pipein, pipeout, pipeerr = pipe
     pipeout.read(&block)
     self
   end
 
-  def on_error(&block)
+  def on_stderr(&block)
     pipein, pipeout, pipeerr = pipe
     pipeerr.read(&block)
     self
+  end
+
+  def on_output(&block)
+    on_stdout(&block).on_stderr(&block)
   end
 
   # Pipes the output through new NSPipes. This means that you will not see
